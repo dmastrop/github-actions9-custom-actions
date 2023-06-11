@@ -2,11 +2,24 @@ name: 'Get and Cache Dependencies'
 # there is no on: because they are triggered by another workflow
 description: 'Get the dependencies (via npm) and cache them.'
 author: Dave Mastropolo
+inputs:
+  # allow users of this action to disable caching
+  caching:
+  #this is our own name "caching" and not reserved
+    description: 'whether to cache dependencies or not'
+    required: false
+    # true must supply value or action will fail, false is optoinal
+    default: 'true'
+    # default is true unless users supply an input of a different value (false)
 runs:
   using: 'composite'
   # composite is a reserved keyword. This is a composite action
   steps:
     - name: Cache dependencies
+      if: inputs.caching == 'true'
+      #inputs context object to access the inputs above
+      # must use "caching" keyname used above in this if:
+      # if any value but true, this entire step will not be executed
       id: cache
       uses: actions/cache@v3
       # you can use other actions in a composite action
@@ -14,7 +27,10 @@ runs:
         path: node_modules
         key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
     - name: Install dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+      #if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' || inputs.caching != 'true'
+      #this states that if there is no cache hit **OR** if we do not want to use caching (based upon input above),
+      # if either one of these matches then we need to run "npm ci" below rather than using the cache.
       run: npm ci
       shell: bash
       # shell must be added when using the run command in a composite action!

@@ -32,6 +32,10 @@ jobs:
         # it is not relative to workflow folder
         # you do not need to specify the name of the file actions.yml 
         # github actions automatially looks for a file of this name in the path directory.
+        with:
+          caching: 'false'
+          # we want to force no cache for lint. Since the default is 'true' (see actions.yml) we have to do this
+          # the other jobs below, build and test we hit the default 'true' and should use caching.
 
       - name: Lint code
         run: npm run lint
@@ -51,6 +55,7 @@ jobs:
     #    run: npm ci
       - name: Load and Cache dependencies
         uses: ./.github/actions/cached-deps
+        # NOTE: in actions.yml that the default for caching input is 'true' so this will use caching for dependencies
       - name: Test code
         id: run-tests
         run: npm run test
@@ -77,6 +82,7 @@ jobs:
     #    run: npm ci
       - name: Load and Cache dependencies
         uses: ./.github/actions/cached-deps
+        # NOTE: in actions.yml that the default for caching input is 'true' so this will use caching for dependencies
       - name: Build website
         run: npm run build
       - name: Upload artifacts
