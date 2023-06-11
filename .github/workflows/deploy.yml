@@ -40,7 +40,7 @@ jobs:
           # the other jobs below, build and test we hit the default 'true' and should use caching.
 
       - name: Output information from the custom action called above (action.yml)
-        run: echo "Cache used? ${{ step.cache-deps.outputs.used-cache }}"   
+        run: echo "Cache used? ${{ steps.cache-deps.outputs.used-cache }}"   
         # this prints the output of this custom actions used above
 
       - name: Lint code
