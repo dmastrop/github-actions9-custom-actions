@@ -12,26 +12,15 @@ jobs:
     steps:
       - name: Get code
         uses: actions/checkout@v3
-    #  - name: Cache dependencies
-    #    id: cache
-    #    uses: actions/cache@v3
-    #    with:
-    #      path: node_modules
-    #      key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
-    #  - name: Install dependencies
-    #    if: steps.cache.outputs.cache-hit != 'true'
-    #    run: npm ci
-      - name: Load and Cache dependencies
-        uses: ./.github/actions/cached-deps
-        # this depends on where the composite action
-        # if in a remote github repo:
-        # dmastrop/my-composite-action
-        # for a local, use a path as above
-        # it will be relative to root as shown above
-        # it is not relative to workflow folder
-        # you do not need to specify the name of the file actions.yml 
-        # github actions automatially looks for a file of this name in the path directory.
-
+      - name: Cache dependencies
+        id: cache
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: npm ci
       - name: Lint code
         run: npm run lint
   test:

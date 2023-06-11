@@ -1,0 +1,20 @@
+name: 'Get and Cache Dependencies'
+# there is no on: because they are triggered by another workflow
+description: 'Get the dependencies (via npm) and cache them.'
+author: Dave Mastropolo
+runs:
+  using: 'composite'
+  # composite is a reserved keyword. This is a composite action
+  steps:
+    - name: Cache dependencies
+      id: cache
+      uses: actions/cache@v3
+      # you can use other actions in a composite action
+      with:
+        path: node_modules
+        key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    - name: Install dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: npm ci
+      shell: bash
+      # shell must be added when using the run command in a composite action!
