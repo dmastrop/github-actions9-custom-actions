@@ -23,8 +23,8 @@ jobs:
     #    if: steps.cache.outputs.cache-hit != 'true'
     #    run: npm ci
       - name: Load and Cache dependencies
-        id: cache-deps
-        #this is the id of this step
+        id: cache-deps-id
+        #this is the id of this step "cache-deps-id"
         uses: ./.github/actions/cached-deps
         # this depends on where the composite action
         # if in a remote github repo:
@@ -40,7 +40,7 @@ jobs:
           # the other jobs below, build and test we hit the default 'true' and should use caching.
 
       - name: Output information from the custom action called above (action.yml)
-        run: echo "Cache used? ${{ steps.cache-deps.outputs.used-cache }}"   
+        run: echo "Cache used? ${{ steps.cache-deps-id.outputs.used-cache }}"   
         # this prints the output of this custom actions used above
 
       - name: Lint code
