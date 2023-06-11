@@ -3,7 +3,10 @@ on:
   push:
     branches:
       - main
+      - master
 jobs:
+# note that the steps for cache dependencies and for install dependencies repeats
+# several times across the various jobs below. This can be optimized with custom actions
   lint:
     runs-on: ubuntu-latest
     steps:
