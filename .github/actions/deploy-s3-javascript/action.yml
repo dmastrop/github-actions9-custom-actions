@@ -1,6 +1,24 @@
 name: 'deploy to AWS S3'
 # live website on internet.
 description: 'deploy a static website via AWS S3.'
+
+inputs:
+  my-s3-bucket:
+  # this "bucket" name is up to you
+    description: 'The s3 bucket name.'
+    required: true
+    # if not required will have to enter a default value.
+  bucket-region: 
+    description: 'The region of the s3 bucket.'
+    required: false
+    default: 'us-east-1'
+    # I am on us-west-1 so I will have to specify this in the deploy.yml worklfow file.
+  dist-folder:
+    description: 'The folder containging the deployable files from the build job'
+    required: true
+    #default: 'dist'
+
+
 runs:
   using: 'node16'
   # this is not 'composite'. This node16 tells github that this is a javacript action
