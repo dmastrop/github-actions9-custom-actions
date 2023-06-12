@@ -52,7 +52,10 @@ function run() {
   // exec.exec will essentially execute this aws command on the shell of the gitlab runner
   // NOTE: the problem with the exec.exec by default will fail. There is no permission to write.
   // need to generate a security credential acces key (access key ID and secret access key)
-  
+  // then add these to the secrets in the git repo and pull them in the deploy job in the main deploy.yml script
+  // main.js will have access to these keys because the step in the deploy.yml calling this custom action js
+  // has these keys defined. (see the deploy.yml file)
+
 
   //test1: send a message to github actions and its log file.
   core.notice('Hello from my custom JavaScript Action!');
