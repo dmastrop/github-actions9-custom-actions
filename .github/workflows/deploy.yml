@@ -119,4 +119,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run custom action
-        uses:
+        uses: ./.github/actions/deploy-s3-javascript
+        # this is the path to the new action.yml file
