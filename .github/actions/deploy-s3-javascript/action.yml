@@ -1,5 +1,5 @@
 name: 'deploy to AWS S3'
-# live website on internet.
+# live website on internet..
 description: 'deploy a static website via AWS S3.'
 
 inputs:
