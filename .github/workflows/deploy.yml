@@ -118,6 +118,10 @@ jobs:
   information: 
     runs-on: ubuntu-latest
     steps:
+      - name: Get code (this projects code to runner)
+        uses: actions/checkout@v3
+        # note we must checkout our code. Each job runs on a separate runner and the runner
+        # must have all of our code to run this custom action below.
       - name: Run custom action
         uses: ./.github/actions/deploy-s3-javascript
         # this is the path to the new action.yml file
