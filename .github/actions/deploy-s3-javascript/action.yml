@@ -1,0 +1,11 @@
+"deploy to AWS S3"
+# live website on internet
+description: 'deploy a static website via AWS S3.'
+runs:
+  using: 'node16'
+  # this is not 'composite'. This node16 tells github that this is a javacript action
+  main: 'main.js'
+  # not steps. this is the main.js file path. In this case we are locating it in same directory
+  # the above is bare miniumum for javascript custom action.
+  # we do not need a pre: and post: javascript before and after the main for this case
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-javascript-actions
