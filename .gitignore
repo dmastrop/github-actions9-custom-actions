@@ -8,7 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 
 /node_modules
-dist
+# only ignore the root dist folder. 
+# there is another dist folder in the deploy-s3-javascript folder
+# is is under the deploy-s3/javascript/node_modules/uuid folder 
+# so change the dist below to /dist
+/dist
 dist-ssr
 *.local
 

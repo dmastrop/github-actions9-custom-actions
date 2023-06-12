@@ -9,3 +9,6 @@ runs:
   # the above is bare miniumum for javascript custom action.
   # we do not need a pre: and post: javascript before and after the main for this case
   # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-javascript-actions
+  # NOTE: that we do not want to gitignore the node_modules in this deploy-s3-javascript directory
+  # github does not install dependencies with custom js actions so they must be included in the  push to the github repo.
+  # all the code must be avaiable to run the js custom action
