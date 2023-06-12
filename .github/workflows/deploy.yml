@@ -112,6 +112,7 @@ jobs:
       # the dist-files are now on the deploy runner.
         run: ls
       - name: Deploy site
+        id: deploy-step
         #run: echo "Deploying..."
         # now we want to use the custom action js to do a real life deploy to AWS S3 bucket
         uses: ./.github/actions/deploy-s3-javascript
@@ -134,6 +135,11 @@ jobs:
           # this file is local and on root of this directory on the deploy runner, so ./dist
           # see path: specified above
           bucket-region: us-west-1
+      - name: Output information of the website to github logs
+        run: |
+          echo "Live URL from AWS: ${{ steps.deploy-step.outputs.my-website-url }}"  
+      # step.deploy-step from above, outputs mandatory, and then my-website-url from action.yml file
+      # this is what actually outputs the url to the github actions logs
 
 
 # this information job does not depend on other jobs above; it will run in parallel
