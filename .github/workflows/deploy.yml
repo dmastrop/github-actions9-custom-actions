@@ -107,24 +107,51 @@ jobs:
         with:
           name: dist-files
           path: ./dist
+          # this path will be used below in the deploy of these files to the s3 bucket below
       - name: Output contents
+      # the dist-files are now on the deploy runner.
         run: ls
       - name: Deploy site
-        run: echo "Deploying..."
-
-
-# this job does not depend on other jobs above; it will run in parallel
-# to illustrate a custom action in javascript
-  information: 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get code (this projects code to runner)
-        uses: actions/checkout@v3
-        # note we must checkout our code. Each job runs on a separate runner and the runner
-        # must have all of our code to run this custom action below.
-        # note that we had to modify the .gitignore file as well and change "dist" folder exclusion to "/dist"
-        # the root dist folder needs to be excluded but the one in in the deploy-s3-javascript/node_modules/uuid needs to be copied over
-        # to the repo (and the runner)
-      - name: Run custom action
+        #run: echo "Deploying..."
+        # now we want to use the custom action js to do a real life deploy to AWS S3 bucket
         uses: ./.github/actions/deploy-s3-javascript
-        # this is the path to the new action.yml file
+        env:
+        # since the AWS access id and secret id are only needed in this step
+        # we should specify them here at this level
+        # these will only be accessible by this step
+        # need to add these keys to this Git repo under the settings like we did 
+        # for the MONGODB in section 8
+        # these keys now are accessible by our custom action js and main.js 
+        # the aws cli command in main.js will automatically look for these variables to authenticate the request
+        # since these are available on the github repo, the deploy runner will have access to them.
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+        # provide the input variables that we defined in the action.yml and main.js
+          my-s3-bucket: github-actions-custom-action-js
+          # this is my specific s3 bucket that I configured
+          dist-folder: ./dist
+          # this file is local and on root of this directory on the deploy runner, so ./dist
+          # see path: specified above
+          bucket-region: us-west-1
+
+
+# this information job does not depend on other jobs above; it will run in parallel
+# to illustrate a custom action in javascript. We can remove this once we implement the completed
+# custom action js above, in the deploy job.
+ 
+#  information: 
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Get code (this projects code to runner)
+#        uses: actions/checkout@v3
+#        # note we must checkout our code. Each job runs on a separate runner and the runner
+#        # must have all of our code to run this custom action below.
+#        # note that we had to modify the .gitignore file as well and change "dist" folder exclusion to "/dist"
+#        # the root dist folder needs to be excluded but the one in in the deploy-s3-javascript/node_modules/uuid needs to be copied over
+#        # to the repo (and the runner)
+#      - name: Run custom action
+#        uses: ./.github/actions/deploy-s3-javascript
+#        # this is the path to the new action.yml file
+#        # this is just a test initially (test1) to do some output just so that we understand
+#        # how to call the custom action js.
