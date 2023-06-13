@@ -118,6 +118,8 @@ jobs:
         
         #uses: ./.github/actions/deploy-s3-javascript
         uses: ./.github/actions/deploy-s3-docker
+        # this is where a container is started, to run the python script
+        # to deploy these files on the deploy runner to AWS.
         
         env:
         # since the AWS access id and secret id are only needed in this step
