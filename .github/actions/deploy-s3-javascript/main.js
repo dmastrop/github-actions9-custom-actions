@@ -61,8 +61,13 @@ function run() {
   core.notice('Hello from my custom JavaScript Action!');
 
   //
-  //const websiteUrl = `http://${bucket}.s3-website-${bucketRegion}.amazonaws.com`;
-  //core.setOutput('website-url', websiteUrl); // echo "website-url=..." >> $GITHUB_OUTPUT
+  const websiteUrl = `http://${bucket}.s3-website-${bucketRegion}.amazonaws.com`;
+  // note that these are back ticks and not single quotes. We can build the url as above
+  // for example, my url is: http://github-actions-custom-action-js.s3-website-us-west-1.amazonaws.com/
+
+  core.setOutput('my-website-url', websiteUrl); // echo "website-url=..." >> $GITHUB_OUTPUT
+  // note the first string is my-website-url name from action.yml and second string is websiteUrl javascript variable.
+  // this sets the value of my-website-url to websiteURL, and action.yml can pass it to deploy.yml
 }
 
 run();

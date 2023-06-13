@@ -20,7 +20,7 @@ inputs:
 outputs:
   my-website-url:
   # this is a name of my choice
-    description: the url of the deployed website'
+    description: 'the url of the deployed website'
     # we don't need a value  here . We needed it for the composite because we needed
     # to tell Github where to get the value in the script
     # with custom js action, it will be generated in the main.js

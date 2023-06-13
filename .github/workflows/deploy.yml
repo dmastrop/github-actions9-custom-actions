@@ -140,6 +140,7 @@ jobs:
           echo "Live URL from AWS: ${{ steps.deploy-step.outputs.my-website-url }}"  
       # step.deploy-step from above, outputs mandatory, and then my-website-url from action.yml file
       # this is what actually outputs the url to the github actions logs
+      # my-website-url variable is set by the code in main.js via websiteURL definition (see main.js)
 
 
 # this information job does not depend on other jobs above; it will run in parallel
