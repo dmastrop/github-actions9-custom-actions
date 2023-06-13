@@ -1,0 +1,187 @@
+name: Deployment
+on:
+  push:
+    branches:
+      - main
+      - master
+jobs:
+# note that the steps for cache dependencies and for install dependencies repeats
+# several times across the various jobs below. This can be optimized with custom actions
+# composite action
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+    #  - name: Cache dependencies
+    #    id: cache
+    #    uses: actions/cache@v3
+    #    with:
+    #      path: node_modules
+    #      key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    #  - name: Install dependencies
+    #    if: steps.cache.outputs.cache-hit != 'true'
+    #    run: npm ci
+      - name: Load and Cache dependencies
+        id: cache-deps-id
+        #this is the id of this step "cache-deps-id"
+        uses: ./.github/actions/cached-deps
+        # this depends on where the composite action
+        # if in a remote github repo:
+        # dmastrop/my-composite-action
+        # for a local, use a path as above
+        # it will be relative to root as shown above
+        # it is not relative to workflow folder
+        # you do not need to specify the name of the file actions.yml 
+        # github actions automatially looks for a file of this name in the path directory.
+        with:
+          caching: 'false'
+          # we want to force no cache for lint. Since the default is 'true' (see actions.yml) we have to do this
+          # the other jobs below, build and test we hit the default 'true' and should use caching.
+
+      - name: Output information from the custom action called above (action.yml)
+        run: echo "Cache used? ${{ steps.cache-deps-id.outputs.used-cache }}"   
+        # this prints the output of this custom actions used above
+
+      - name: Lint code
+        run: npm run lint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+    #  - name: Cache dependencies
+    #    id: cache
+    #    uses: actions/cache@v3
+    #    with:
+    #      path: node_modules
+    #      key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    #  - name: Install dependencies
+    #    if: steps.cache.outputs.cache-hit != 'true'
+    #    run: npm ci
+      - name: Load and Cache dependencies
+        uses: ./.github/actions/cached-deps
+        # NOTE: in actions.yml that the default for caching input is 'true' so this will use caching for dependencies
+      - name: Test code
+        id: run-tests
+        run: npm run test
+      - name: Upload test report
+        if: failure() && steps.run-tests.outcome == 'failure'
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-report
+          path: test.json
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+    #  - name: Cache dependencies
+    #    id: cache
+    #    uses: actions/cache@v3
+    #    with:
+    #      path: node_modules
+    #      key: deps-node-modules-${{ hashFiles('**/package-lock.json') }}
+    #  - name: Install dependencies
+    #    if: steps.cache.outputs.cache-hit != 'true'
+    #    run: npm ci
+      - name: Load and Cache dependencies
+        uses: ./.github/actions/cached-deps
+        # NOTE: in actions.yml that the default for caching input is 'true' so this will use caching for dependencies
+      - name: Build website
+        run: npm run build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: dist-files
+          path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Get build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: dist-files
+          path: ./dist
+          # this path will be used below in the deploy of these files to the s3 bucket below
+      - name: Output contents
+      # the dist-files are now on the deploy runner.
+        run: ls
+      - name: Deploy site
+        id: deploy-step
+        #run: echo "Deploying..."
+        
+        # now we want to use the custom action js to do a real life deploy to AWS S3 bucket
+        #uses: ./.github/actions/deploy-s3-javascript
+        
+        # this is where a container is started, to run the python script and
+        # to deploy these files on the deploy runner to AWS.
+        #uses: ./.github/actions/deploy-s3-docker
+
+        # the next path is for remote repository hosting of the js custom action used earlier:
+        uses: dmastrop/github-actions91-remote-repo-custom-action-javascript@v1
+ 
+
+
+        env:
+        # since the AWS access id and secret id are only needed in this step
+        # we should specify them here at this level
+        # these will only be accessible by this step
+        # need to add these keys to this Git repo under the settings like we did 
+        # for the MONGODB in section 8
+        # these keys now are accessible by our custom action js and main.js 
+        # the aws cli command in main.js will automatically look for these variables to authenticate the request
+        # since these are available on the github repo, the deploy runner will have access to them.
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+# AWS access id and secret are still required with the docker python approach, and the 
+# AWS boto3 SDK in the python code will know to use these in order to write to the s3 bucket.
+# the python code is s3_client = boto3.client
+
+
+        with:
+        # provide the input variables that we defined in the action.yml and main.js
+          my-s3-bucket: github-actions-custom-action-js
+          # this is my specific s3 bucket that I configured
+          dist-folder: ./dist
+          # this file is local and on root of this directory on the deploy runner, so ./dist
+          # see path: specified above
+          bucket-region: us-west-1
+      - name: Output information of the website to github logs
+        run: |
+          echo "Live URL from AWS: ${{ steps.deploy-step.outputs.my-website-url }}"  
+      # step.deploy-step from above, outputs mandatory, and then my-website-url from action.yml file
+      # this is what actually outputs the url to the github actions logs
+      # my-website-url variable is set by the code in main.js via websiteURL definition (see main.js)
+      
+      # in python docker setup, this is done in a smilar fashion with the deployment.py via the website_url
+      # definition that builds the url.
+      
+      # NOTE:for the docker container python setup note that the action.yml abstracts the differences in the javascript
+      # vs. python approaches so that we do not need to change this steps.deploy-step.outputs.my-website-url
+      # the underlying code mechansim is fully abstracted from the deploy.yml with the action.yml
+
+
+# this information job does not depend on other jobs above; it will run in parallel
+# to illustrate a custom action in javascript. We can remove this once we implement the completed
+# custom action js above, in the deploy job.
+ 
+#  information: 
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Get code (this projects code to runner)
+#        uses: actions/checkout@v3
+#        # note we must checkout our code. Each job runs on a separate runner and the runner
+#        # must have all of our code to run this custom action below.
+#        # note that we had to modify the .gitignore file as well and change "dist" folder exclusion to "/dist"
+#        # the root dist folder needs to be excluded but the one in in the deploy-s3-javascript/node_modules/uuid needs to be copied over
+#        # to the repo (and the runner)
+#      - name: Run custom action
+#        uses: ./.github/actions/deploy-s3-javascript
+#        # this is the path to the new action.yml file
+#        # this is just a test initially (test1) to do some output just so that we understand
+#        # how to call the custom action js.
