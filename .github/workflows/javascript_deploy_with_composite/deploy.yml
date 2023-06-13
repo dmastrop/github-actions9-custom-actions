@@ -115,10 +115,7 @@ jobs:
         id: deploy-step
         #run: echo "Deploying..."
         # now we want to use the custom action js to do a real life deploy to AWS S3 bucket
-        
-        #uses: ./.github/actions/deploy-s3-javascript
-        uses: ./.github/actions/deploy-s3-docker
-        
+        uses: ./.github/actions/deploy-s3-javascript
         env:
         # since the AWS access id and secret id are only needed in this step
         # we should specify them here at this level
@@ -130,11 +127,6 @@ jobs:
         # since these are available on the github repo, the deploy runner will have access to them.
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-# AWS access id and secret are still required with the docker python approach, and the 
-# AWS boto3 SDK in the python code will know to use these in order to write to the s3 bucket.
-# the python code is s3_client = boto3.client
-
-
         with:
         # provide the input variables that we defined in the action.yml and main.js
           my-s3-bucket: github-actions-custom-action-js
@@ -149,13 +141,6 @@ jobs:
       # step.deploy-step from above, outputs mandatory, and then my-website-url from action.yml file
       # this is what actually outputs the url to the github actions logs
       # my-website-url variable is set by the code in main.js via websiteURL definition (see main.js)
-      
-      # in python docker setup, this is done in a smilar fashion with the deployment.py via the website_url
-      # definition that builds the url.
-      
-      # NOTE:for the docker container python setup note that the action.yml abstracts the differences in the javascript
-      # vs. python approaches so that we do not need to change this steps.deploy-step.outputs.my-website-url
-      # the underlying code mechansim is fully abstracted from the deploy.yml with the action.yml
 
 
 # this information job does not depend on other jobs above; it will run in parallel

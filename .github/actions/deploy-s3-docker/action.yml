@@ -1,0 +1,34 @@
+name: 'Deploy to AWS S3'
+description: 'Deploy a static website via AWS S3.'
+
+# note the syntax for the deploy.yml is the same for inputs: and output: for
+# both custom action js and docker custom action.
+# but python syntax to access inputs will be different and also outputing the url will be different as well.
+inputs:
+  my-s3-bucket:
+  # this "bucket" name is up to you
+    description: 'The s3 bucket name.'
+    required: true
+    # if not required will have to enter a default value.
+  bucket-region: 
+    description: 'The region of the s3 bucket.'
+    required: false
+    default: 'us-east-1'
+    # I am on us-west-1 so I will have to specify this in the deploy.yml worklfow file.
+  dist-folder:
+    description: 'The folder containging the deployable files from the build job'
+    required: true
+    #default: 'dist'
+outputs:
+  my-website-url:
+  # this is a name of my choice
+    description: 'The URL of the deployed website.'
+
+runs:
+  using: 'docker'
+  # this must be set to docker (node16 was to run the javascript custom action)
+  image: 'Dockerfile'
+  # this will invoke the docker container using this Dockerfile that is copied from our local to the runner
+  # the runner will instantiate the docker container using this Dockerfile.
+  # could also use a dockerhub container.
+  # https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-docker-container-actions
